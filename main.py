@@ -5,9 +5,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram import Bot, types
 
-
-TOKEN = os.getenv('5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0')
-bot = Bot(token=TOKEN)
+bot = Bot(token='5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0')
 dp = Dispatcher(bot)
 
 HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
