@@ -5,10 +5,11 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 from aiogram import Bot, types
 
-bot = Bot(token='5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0')
+TOKEN = '5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0'
+bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-HEROKU_APP_NAME = os.getenv('HEROKU_APP_NAME')
+HEROKU_APP_NAME = 'aiogram-bot-zalupka'
 
 # webhook settings
 WEBHOOK_HOST = f'https://{HEROKU_APP_NAME}.herokuapp.com'
