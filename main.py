@@ -1,20 +1,13 @@
 import logging
+
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.webhook import SendMessage
-from aiogram.utils.executor import Executor
 from aiogram.utils.executor import start_webhook
-from aiogram.dispatcher.webhook import WebhookRequestHandler
-from message import *
 
 
-MAIN_TOKEN = '5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0'
-TOKEN = '5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0'
-main_bot = Bot(token=MAIN_TOKEN)
-main_dp = Dispatcher(main_bot)
-bot = Bot(token=TOKEN)
-dp = Dispatcher(bot)
+API_TOKEN = '5491700411:AAFo1W2J473h67HD6LMUHfK5s4Ar94MGhs0'
 
 HEROKU_APP_NAME = 'aiogram-bot-zalupka'
 
@@ -27,57 +20,34 @@ WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = default = 8000
 
-
-class MultiBotWebhookRequestHandler(WebhookRequestHandler):
-	async def post(self):
-		self.validate_ip()
-
-		dispatcher = self.get_dispatcher()
-		update = await self.parse_update(dispatcher.bot)
-
-		with bot.with_token(self.request.match_info["token"]):
-			results = await self.process_update(update)
-		response = self.get_response(results)
-
-		if response:
-			web_response = response.get_web_response()
-		else:
-			web_response = web.Response(text="ok")
-
-		if self.request.app.get("RETRY_AFTER", None):
-			web_response.headers["Retry-After"] = self.request.app["RETRY_AFTER"]
-
-		return web_response
-
 logging.basicConfig(level=logging.INFO)
 
-@main_dp.message_handler(commands=['start'])
-async def main_start_cmd(message: types.Message):
-	# команда /start
-	await SendMessage(chat_id=message.chat.id, text=START_MSG_1)
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
+dp.middleware.setup(LoggingMiddleware())
 
 
-async def on_startup(main_dp):
-	# Setup bots webhok
-	await bot.set_webhook(WEBHOOK_URL.format(token=TOKEN))
-	#with bot.with_token("another_token"):
-	#	await bot.set_webhook(WEBHOOK_URL.format(token="another_token"))
-	#with bot.with_token("yet_another_token"):
-	#	await bot.set_webhook(WEBHOOK_URL.format(token="yet_another_token"))
+@dp.message_handler()
+async def echo(message: types.Message):
+	# Regular request
+	# await bot.send_message(message.chat.id, message.text)
+
+	# or reply INTO webhook
+	return SendMessage(message.chat.id, message.text)
 
 
-async def on_shutdown(main_dp):
+async def on_startup(dp):
+	await bot.set_webhook(WEBHOOK_URL)
+	# insert code here to run it after start
+
+
+async def on_shutdown(dp):
 	logging.warning('Shutting down..')
 
 	# insert code here to run it before shutdown
 
 	# Remove webhook (not acceptable in some cases)
 	await bot.delete_webhook()
-	#with bot.with_token("another_token"):
-	#	await bot.delete_webhook()
-	#with bot.with_token("yet_another_token"):
-	#	await bot.delete_webhook()
-
 
 	# Close DB connection (if used)
 	await dp.storage.close()
@@ -88,12 +58,11 @@ async def on_shutdown(main_dp):
 
 if __name__ == '__main__':
 	start_webhook(
-		dispatcher=main_dp,
+		dispatcher=dp,
 		webhook_path=WEBHOOK_PATH,
-		skip_updates=True,
 		on_startup=on_startup,
 		on_shutdown=on_shutdown,
+		skip_updates=True,
 		host=WEBAPP_HOST,
 		port=WEBAPP_PORT,
 	)
-	print("piska-sosiska")
