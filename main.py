@@ -57,7 +57,7 @@ async def main_start_cmd(message: types.Message):
 	await SendMessage(chat_id=message.chat.id, text=START_MSG_1)
 
 
-async def on_startup(dp):
+async def on_startup(main_dp):
 	# Setup bots webhok
 	await bot.set_webhook(WEBHOOK_URL.format(token=TOKEN))
 	#with bot.with_token("another_token"):
@@ -66,7 +66,7 @@ async def on_startup(dp):
 	#	await bot.set_webhook(WEBHOOK_URL.format(token="yet_another_token"))
 
 
-async def on_shutdown(dp):
+async def on_shutdown(main_dp):
 	logging.warning('Shutting down..')
 
 	# insert code here to run it before shutdown
